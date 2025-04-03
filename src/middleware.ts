@@ -50,5 +50,5 @@ export const middleware = (req: NextRequest) => {
 
 // Supports both a single string value or an array of matchers.
 export const config = {
-  matcher: ['/', '/login', '/admin/:path*'],
+  matcher: ['/', '/login', '/admin/:path*','/padron/:path*'],
 }

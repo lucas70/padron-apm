@@ -61,6 +61,59 @@ export const useSession = () => {
     }
   }
 
+  const sesionPeticionPdf = async ({
+    url,
+    method = 'get',
+    body,
+    headers,
+    params,
+    responseType,
+    withCredentials,
+  }: peticionFormatoMetodo) => {
+    try {
+      if (!verificarToken(leerCookie('token') ?? '')) {
+        imprimir(`Token caducado ⏳`)
+        await actualizarSesion()
+      }
+
+      const cabeceras = {
+        accept: 'application/json',
+        Authorization: `Bearer ${leerCookie('token') ?? ''}`,
+        ...headers,
+      }
+
+      imprimir(`enviando 🔐🌍`, body, method, url, cabeceras)
+      const response = await Servicios.peticionHTTP({
+        url,
+        method: method,
+        headers: cabeceras,
+        body,
+        params,
+        responseType,
+        withCredentials,
+      })
+      imprimir('respuesta 🔐📡', body, method, url, response)
+      return response.data.blob()
+    } catch (e: import('axios').AxiosError | any) {
+      if (e.code === 'ECONNABORTED') {
+        throw new Error('La petición está tardando demasiado')
+      }
+
+      if (Servicios.isNetworkError(e)) {
+        throw new Error('Error en la conexión 🌎')
+      }
+
+      if (estadosSinPermiso.includes(e.response?.status)) {
+        mostrarFullScreen()
+        await cerrarSesion()
+        ocultarFullScreen()
+        return
+      }
+
+      throw e.response?.data || 'Ocurrió un error desconocido'
+    }
+  }
+
   const borrarCookiesSesion = () => {
     eliminarCookie('token') // Eliminando access_token
     eliminarCookie('jid') // Eliminando refresh token
@@ -116,5 +169,54 @@ export const useSession = () => {
     }
   }
 
-  return { sesionPeticion, cerrarSesion, borrarCookiesSesion }
+  const sesionPeticionExterno = async ({
+    url,
+    method = 'get',
+    body,
+    headers,
+    params,
+    responseType,
+    withCredentials,
+  }: peticionFormatoMetodo) => {
+    try {
+
+      const cabeceras = {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJoNjFaNlRHTXZuZ0FTZjZ0blVFYlFWc05EOTE2Q3FDRiIsInVzZXIiOiJhY2hhbmEiLCJleHAiOjE2ODYyMzQ2NDIsImlhdCI6MTY3ODQ1ODY0Mn0._aUJAt28BVGQALCkYpmYcn87vQbxInjHLqN3b8srCLc',
+      }
+
+      imprimir(`enviando 🔐🌍`, body, method, url, cabeceras)
+      const response = await Servicios.peticionHTTP({
+        url,
+        method: method,
+        headers: cabeceras,
+        body,
+        params,
+        responseType,
+        withCredentials,
+      })
+      imprimir('respuesta 🔐📡', body, method, url, response)
+      return response.data
+    } catch (e: import('axios').AxiosError | any) {
+      if (e.code === 'ECONNABORTED') {
+        throw new Error('La petición está tardando demasiado')
+      }
+
+      if (Servicios.isNetworkError(e)) {
+        throw new Error('Error en la conexión 🌎')
+      }
+
+      if (estadosSinPermiso.includes(e.response?.status)) {
+        mostrarFullScreen()
+        await cerrarSesion()
+        ocultarFullScreen()
+        return
+      }
+
+      throw e.response?.data || 'Ocurrió un error desconocido'
+    }
+  }
+
+
+  return { sesionPeticion, sesionPeticionPdf, cerrarSesion, borrarCookiesSesion, sesionPeticionExterno }
 }

@@ -6,11 +6,34 @@ import { Card, CardActionArea, CardContent, Chip, Grid } from '@mui/material'
 import { useAuth } from '@/context/AuthProvider'
 import { useRouter } from 'next/navigation'
 import { Icono } from '@/components/Icono'
+import { useDatoContextoStore } from '@/lib/_store/datoContexto'
+import { useEffect } from 'react'
 
 export default function HomePage() {
   const { usuario, rolUsuario } = useAuth()
 
+  const { dataContexto, updateTecnico, updateTemporal } = useDatoContextoStore((state) => state);
+
   const router = useRouter()
+  
+  const obtenerPerfil = async () => {
+
+    const temporal = await usuario?.roles.find((rol) => rol.rol === 'TEMPORAL')
+    console.log('temporal:-->', temporal)
+    if (temporal !== undefined)
+      updateTemporal(true)
+
+    const tecnico = await usuario?.roles.find((rol) => rol.rol === 'TECNICO')
+    if (tecnico !== undefined)
+      updateTecnico(true)
+    console.log('tecnico:-->', tecnico)
+    console.log('dataContexto:-->', dataContexto)
+
+  }
+  
+  useEffect(() => {
+    obtenerPerfil().finally(()=>{});
+  }, []);
 
   return (
     <>

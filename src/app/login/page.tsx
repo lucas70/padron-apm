@@ -62,7 +62,7 @@ export default function LoginPage() {
               fontWeight={'500'}
               align={sm || xs ? 'center' : 'left'}
             >
-              Frontend base con Next.js, MUI v5 y TypeScript
+              ATENCION A ACTORES PRODUCTIVOS MINEROS (SI-APM)
             </Typography>
           </Box>
         </Box>

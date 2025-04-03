@@ -111,7 +111,20 @@ const LoginContainer = () => {
           >
             <Typography sx={{ fontWeight: '600' }}>Iniciar sesión</Typography>
           </Button>
-
+          <Box sx={{ mt: 3 }}>
+            <Typography fontSize={'small'} sx={{ fontWeight: '600' }}>
+              <Button
+                variant="text"
+                sx={{ p: 0 }}
+                disabled={progresoLogin}
+                onClick={async () => {
+                  await router.push('solicitud')
+                }}
+              >
+                Regístra tu cuenta temporal
+              </Button>
+            </Typography>
+          </Box>
           <Box sx={{ pt: 2, pb: 2 }}>
             <Divider>
               <Typography color="text.secondary">O</Typography>
