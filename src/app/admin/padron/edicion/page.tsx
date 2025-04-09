@@ -38,8 +38,9 @@ export default function EdicionPage() {
 
     const obtenerEstado = () => {
         console.log('dataContexto:-->', dataContexto, 'etapa:-->', datoGral.etapaActorMinero.id)
-        if ((dataContexto.esTemporal && datoGral.etapaActorMinero.id !== '53') ||
-            (dataContexto.esTecnico && datoGral.etapaActorMinero.id === '50')) {
+        console.log('dato general:-->', datoGral)
+        if ((dataContexto.esTemporal && (datoGral.etapaActorMinero.id !== '53' && datoGral.etapaActorMinero.id !== '') ) ||
+            (dataContexto.esTecnico && (datoGral.etapaActorMinero.id === '50'))) {
                 setActiveStep(5)
                 setEditable(false)
             }

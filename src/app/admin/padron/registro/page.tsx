@@ -16,13 +16,16 @@ import { usePathname } from "next/navigation";
 import { ReactNode, useEffect, useState } from 'react'
 import { IconoBoton } from "@/components/botones/IconoBoton";
 import { useDatoGralStore } from "@/lib/_store/datoGralStore";
+import { FiltroApm } from "./ui/FiltroApm";
 
 
 export default function RegistroPage() {
   // router para conocer la ruta actual
   const pathname = usePathname()
   const [errorModulosData, setErrorModulosData] = useState<any>()
-  const [mostrarFiltroModulo, setMostrarFiltroModulo] = useState(false)
+  const [mostrarFiltroApm, setMostrarFiltroApm] = useState(false)
+  const [filtroApm, setFiltroApm] = useState<string>('')
+
   const [loading, setLoading] = useState<boolean>(true)
   const [limite, setLimite] = useState<number>(10)
   const [pagina, setPagina] = useState<number>(1)
@@ -113,6 +116,7 @@ export default function RegistroPage() {
         params: {
           pagina: pagina,
           limite: limite,
+          ...(filtroApm.length == 0 ? {} : { filtro: filtroApm }),
         },
       })
       setApmsData(respuesta.datos?.filas)
@@ -133,6 +137,7 @@ export default function RegistroPage() {
   }, [
     pagina,
     limite,
+    filtroApm,
   ])
 
   useEffect(() => {
@@ -144,8 +149,8 @@ export default function RegistroPage() {
       id={'accionFiltrarApmToggle'}
       key={'accionFiltrarApmToggle'}
       icono="search"
-      seleccionado={mostrarFiltroModulo}
-      cambiar={setMostrarFiltroModulo}
+      seleccionado={mostrarFiltroApm}
+      cambiar={setMostrarFiltroApm}
     />,
     <IconoTooltip
       id={`ActualizarApm`}
@@ -223,6 +228,11 @@ export default function RegistroPage() {
     ]
   )
 
+  useEffect(() => {
+    if (!mostrarFiltroApm) {
+      setFiltroApm('')
+    }
+  }, [mostrarFiltroApm])
 
   return (
     <div>
@@ -235,6 +245,19 @@ export default function RegistroPage() {
         cambioOrdenCriterios={setOrdenCriterios}
         paginacion={paginacion}
         contenidoTabla={contenidoTabla}
+        filtros={
+                  mostrarFiltroApm && (
+                    <FiltroApm
+                      buscarApm={filtroApm}
+                      accionCorrecta={(filtros) => {
+                        setPagina(1)
+                        setLimite(10)
+                        setFiltroApm(filtros.buscar)
+                      }}
+                      accionCerrar={() => {}}
+                    />
+                  )
+                }
       />
     </div>
   );
