@@ -123,6 +123,20 @@ const LoginContainer = () => {
               >
                 Regístra tu cuenta temporal
               </Button>
+              &nbsp;&nbsp;
+              <Button
+                variant="text"
+                sx={{ p: 0 }}
+                disabled={progresoLogin}
+                onClick={async () => {
+                  await router.push('personaliza')
+                }}
+              >
+                Personaliza tu PIN inicial
+              </Button>
+            </Typography>
+            <Typography fontSize={'small'} sx={{ fontWeight: '600' }}>
+
             </Typography>
           </Box>
           <Box sx={{ pt: 2, pb: 2 }}>

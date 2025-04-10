@@ -1,20 +1,21 @@
 import { staticGenerationAsyncStorage } from "next/dist/client/components/static-generation-async-storage-instance"
 import { create } from "zustand"
+import { persist, createJSONStorage } from 'zustand/middleware'
 
 export interface DatoGralType {
-    id: string 
+    id: string
     razonSocial: string
-    numeroDocumento: string 
-    nia: string 
-    telefono: string 
-    celular: string 
-    correoElectronico: string 
+    numeroDocumento: string
+    nia: string
+    telefono: string
+    celular: string
+    correoElectronico: string
     tipoActorMinero: ParametroType
-    municipio: ParametroType 
-    departamento: ParametroType 
-    etapaActorMinero: ParametroType 
-    oficina: ParametroType 
-    estado: string 
+    municipio: ParametroType
+    departamento: ParametroType
+    etapaActorMinero: ParametroType
+    oficina: ParametroType
+    estado: string
 }
 
 export interface ParametroType {
@@ -36,11 +37,11 @@ const DATOGRAL_INITIAL = {
     telefono: '',
     celular: '',
     correoElectronico: '',
-    tipoActorMinero: {id:'',descripcion:''},
-    municipio: {id:'',descripcion:''},
-    departamento: {id:'',descripcion:''},
-    etapaActorMinero: {id:'',descripcion:''},
-    oficina: {id:'',descripcion:''},
+    tipoActorMinero: { id: '', descripcion: '' },
+    municipio: { id: '', descripcion: '' },
+    departamento: { id: '', descripcion: '' },
+    etapaActorMinero: { id: '', descripcion: '' },
+    oficina: { id: '', descripcion: '' },
     estado: '',
 }
 
@@ -58,17 +59,25 @@ interface DatoGralActions {
     clearState: () => void;
 }
 
-export const useDatoGralStore = create<DatoGralState & DatoGralActions>((set) => ({
-    datoGral: DATOGRAL_INITIAL_STATE.datoGral,
-    cambios: DATOGRAL_INITIAL_STATE.cambios,
-    error: DATOGRAL_INITIAL_STATE.error,
-    // Actions
-    updateDatoGral: (newDato) => set((state)=>({ datoGral: newDato, error: state.error, cambios: true })),
-    updateError: (newError) => set((state)=>({ datoGral: state.datoGral, error: newError })),
-    updateCambios: (newCambio) => set((state)=>({datoGral:state.datoGral, error: state.error, cambios: newCambio})),
-    clearState: () => set({
-        datoGral: DATOGRAL_INITIAL_STATE.datoGral,
-        error: DATOGRAL_INITIAL_STATE.error
-    })
-}));
+export const useDatoGralStore = create<DatoGralState & DatoGralActions>()(
+    persist(
+        (set, get) => ({
+            datoGral: DATOGRAL_INITIAL_STATE.datoGral,
+            cambios: DATOGRAL_INITIAL_STATE.cambios,
+            error: DATOGRAL_INITIAL_STATE.error,
+            // Actions
+            updateDatoGral: (newDato) => set((state) => ({ datoGral: newDato, error: state.error, cambios: true })),
+            updateError: (newError) => set((state) => ({ datoGral: state.datoGral, error: newError })),
+            updateCambios: (newCambio) => set((state) => ({ datoGral: state.datoGral, error: state.error, cambios: newCambio })),
+            clearState: () => set({
+                datoGral: DATOGRAL_INITIAL_STATE.datoGral,
+                error: DATOGRAL_INITIAL_STATE.error
+            })
+        }),
+        {
+            name: 'apm-storage', // name of the item in the storage (must be unique)
+            storage: createJSONStorage(() => sessionStorage), // (optional) by default, 'localStorage' is used
+        },
+    ),
+);
 
