@@ -17,8 +17,9 @@ import { useDatoGralStore } from '@/lib/_store/datoGralStore';
 import { useAlerts, useSession } from '@/hooks';
 import { useAuth } from '@/context/AuthProvider'
 import { useDatoContextoStore } from '@/lib/_store/datoContexto';
+import ArchivosAdjuntoPage from '@/components/form/padron/archivosAdjunto';
 
-const steps = ['Datos Generales', 'Direcciones', 'Representantes', 'Borrador', 'Finalizar', 'Imprimir'];
+const steps = ['Datos Generales', 'Direcciones', 'Representantes', 'Borrador', 'Adjuntos', 'Finalizar', 'Imprimir'];
 
 export default function EdicionPage() {
 
@@ -37,13 +38,12 @@ export default function EdicionPage() {
     const { sesionPeticion } = useSession()
 
     const obtenerEstado = () => {
-        console.log('dataContexto:-->', dataContexto, 'etapa:-->', datoGral.etapaActorMinero.id)
-        console.log('dato general:-->', datoGral)
-        if ((dataContexto.esTemporal && (datoGral.etapaActorMinero.id !== '53' && datoGral.etapaActorMinero.id !== '') ) ||
+        if ((dataContexto.esTemporal && (datoGral.etapaActorMinero.id !== '53' && datoGral.etapaActorMinero.id !== '')) ||
             (dataContexto.esTecnico && (datoGral.etapaActorMinero.id === '50'))) {
-                setActiveStep(5)
-                setEditable(false)
-            }
+            console.log('ingreso por aqui carajo -->')
+            setActiveStep(6)
+            setEditable(false)
+        }
     }
 
     useEffect(() => {
@@ -138,21 +138,18 @@ export default function EdicionPage() {
                             Anterior
                         </Button>
                         <Box sx={{ flex: '1 1 auto' }} />
-                        {isStepOptional(activeStep) && (
-                            <Button color="inherit" onClick={handleSkip} sx={{ mr: 1 }}>
-                                Saltar
-                            </Button>
-                        )}
-                        <Button onClick={handleNext} disabled={datoGral.id === ''}>
-                            {activeStep === steps.length - 1 ? 'Finalizar' : 'Siguiente'}
+
+                        <Button onClick={handleNext} disabled={datoGral.id === '' || activeStep === 5 || activeStep === 6}>
+                            Siguiente
                         </Button>
                     </Box>
                     {activeStep === 0 && <DatosGeneralesPage />}
                     {activeStep === 1 && <BandejaDireccionesPage />}
                     {activeStep === 2 && <BandejaRepresentantesPage />}
                     {activeStep === 3 && <FormularioBorradorPage />}
-                    {activeStep === 4 && <FinalizaRegistroPage />}
-                    {activeStep === 5 && <ImpresionFormulariosPage />}
+                    {activeStep === 4 && <ArchivosAdjuntoPage />}
+                    {activeStep === 5 && <FinalizaRegistroPage />}
+                    {activeStep === 6 && <ImpresionFormulariosPage />}
 
                 </Fragment>
             )}

@@ -1,4 +1,4 @@
-# Frontend Base - NextJS/ReactJS
+# SI-APM - NextJS/ReactJS
 
 Este proyecto es compatible con el
 actual [Backend Base](https://gitlab.softwarelibre.gob.bo/capacitacion/nestjs-base-backend) creado con

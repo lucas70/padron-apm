@@ -24,7 +24,7 @@ export const NavbarLogin = () => {
       >
         <DialogContent>
           <Typography variant={'body2'}>
-            Propuesta de Frontend Base Login creado con NextJS y Typescript
+             Login creado con NextJS y Typescript
           </Typography>
         </DialogContent>
       </CustomDialog>

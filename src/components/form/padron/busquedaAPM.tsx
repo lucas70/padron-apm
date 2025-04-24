@@ -121,7 +121,7 @@ const BusquedaAPMComponente = () => {
                                     Nª Identificador
                                 </Typography>
                             </InputLabel>
-                            <Box sx={{ p: 2, height: 40, border: '1px solid', backgroundColor: '#f5f4f4' }}>{datoGral.razonSocial}</Box>
+                            <Box sx={{ p: 2, height: 40, border: '1px solid', backgroundColor: '#f5f4f4' }}>{datoGral.numeroDocumento}</Box>
                         </Grid>
                     </Grid>
                 )

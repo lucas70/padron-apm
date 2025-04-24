@@ -19,7 +19,7 @@ El anterior archivo debe contener las siguientes variables cuyos valores van a v
 
 ```bash
 NEXT_PUBLIC_APP_ENV=development
-NEXT_PUBLIC_SITE_NAME="Frontend base"
+NEXT_PUBLIC_SITE_NAME="SI-APM"
 NEXT_PUBLIC_BASE_URL="https://dominio.gob.bo/ws/api"
 ```
 
@@ -55,7 +55,7 @@ npm run dev
 
    ```
    NEXT_PUBLIC_APP_ENV=production # importante
-   NEXT_PUBLIC_SITE_NAME="Frontend base - Nombre de producción"
+   NEXT_PUBLIC_SITE_NAME="SI-APM"
    NEXT_PUBLIC_PATH=""
    NEXT_PUBLIC_BASE_URL="URL de producción"
    ```

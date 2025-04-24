@@ -9,14 +9,16 @@ import { useAuth } from "@/context/AuthProvider";
 import { useAlerts, useSession } from "@/hooks";
 import { useRouter } from 'next/navigation'
 import { CasbinTypes } from "@/types";
-import { InterpreteMensajes } from "@/utils";
+import { InterpreteMensajes, titleCase } from "@/utils";
 import { imprimir } from "@/utils/imprimir";
-import { useMediaQuery, useTheme, Typography, Stack } from "@mui/material";
+import { useMediaQuery, useTheme, Typography, Stack, Button } from "@mui/material";
 import { usePathname } from "next/navigation";
 import { ReactNode, useEffect, useState } from 'react'
 import { IconoBoton } from "@/components/botones/IconoBoton";
 import { useDatoGralStore } from "@/lib/_store/datoGralStore";
 import { FiltroApm } from "./ui/FiltroApm";
+import { Imprima } from "next/font/google";
+import { AlertDialog } from "@/components/modales/AlertDialog";
 
 
 export default function RegistroPage() {
@@ -30,8 +32,10 @@ export default function RegistroPage() {
   const [limite, setLimite] = useState<number>(10)
   const [pagina, setPagina] = useState<number>(1)
   const [total, setTotal] = useState<number>(0)
+  const [mostrarConfirmacion, setMostrarConfirmacion] = useState(false)
   const [apmsData, setApmsData] = useState<any[]>([])
   const { datoGral, clearState, updateDatoGral } = useDatoGralStore((state) => state)
+  const [datoSeleccionado, setDatoSeleccionado] = useState<any>()
 
   const theme = useTheme()
   const xs = useMediaQuery(theme.breakpoints.only('xs'))
@@ -215,10 +219,15 @@ export default function RegistroPage() {
             color={'primary'}
             accion={() => {
               imprimir(`Editaremos :`, apmData)
-              clearState()
-              obtenerApm(apmData.id)
+              setDatoSeleccionado(apmData);
+              if (apmData.etapaActorMinero.id != 50) {
+                clearState()
+                obtenerApm(apmData.id)
+                router.replace('/admin/padron/edicion')
+              } else {
+                setMostrarConfirmacion(true)
+              }
 
-              router.replace('/admin/padron/edicion')
             }}
             icono={'edit'}
             name={'Editar módulo'}
@@ -234,8 +243,80 @@ export default function RegistroPage() {
     }
   }, [mostrarFiltroApm])
 
+  const cancelarConfirmacion = async () => {
+    setMostrarConfirmacion(false)
+  }
+
+  const guardarDatosGrales = async () => {
+    console.log('datos a guardar:', datoGral);
+    try {
+      setLoading(true)
+      //await delay(1000)
+      const respuesta = await sesionPeticion({
+        url: `${Constantes.baseUrl}/actores/${datoSeleccionado.id}`,
+        method: 'patch',
+        body: {
+          idTipoActorMinero: datoSeleccionado.tipoActorMinero.id,
+          idMunicipio: datoSeleccionado.municipio.id,
+          razonSocial: datoSeleccionado.razonSocial,
+          numeroDocumento: datoSeleccionado.numeroDocumento,
+          telefono: datoSeleccionado.telefono,
+          celular: datoSeleccionado.celular,
+          correoElectronico: datoSeleccionado.correoElectronico,
+          idEtapa: "50",
+          estado: "ACTIVO"
+        },
+      })
+      updateDatoGral({
+        ...datoGral,
+        id: respuesta.datos.filas[0].id,
+        razonSocial: respuesta.datos.filas[0].razonSocial,
+        numeroDocumento: respuesta.datos.filas[0].numeroDocumento,
+        nia: respuesta.datos.filas[0].nia,
+        telefono: respuesta.datos.filas[0].telefono,
+        celular: respuesta.datos.filas[0].celular,
+        correoElectronico: respuesta.datos.filas[0].correoElectronico,
+        tipoActorMinero: { id: respuesta.datos.filas[0].tipoActorMinero.id, descripcion: respuesta.datos.filas[0].tipoActorMinero.nombre },
+        municipio: { id: respuesta.datos.filas[0].municipio.id, descripcion: respuesta.datos.filas[0].municipio.nombre },
+        departamento: { id: respuesta.datos.filas[0].municipio.dependencia.dependencia.id, descripcion: respuesta.datos.filas[0].municipio.dependencia.dependencia.nombre },
+        etapaActorMinero: { id: respuesta.datos.filas[0].etapaActorMinero.id, descripcion: respuesta.datos.filas[0].etapaActorMinero.nombre },
+        oficina: { id: respuesta.datos.filas[0].oficina.id, descripcion: respuesta.datos.filas[0].oficina.nombre },
+        estado: respuesta.datos.filas[0].estado
+      })
+      Alerta({
+        mensaje: InterpreteMensajes(respuesta),
+        variant: 'success',
+      })
+
+    } catch (e) {
+      imprimir(`Error al crear o actualizar los datos del APM`, e)
+      Alerta({ mensaje: `${InterpreteMensajes(e)}`, variant: 'error' })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const aceptarConfirmacion = async () => {
+
+    guardarDatosGrales();
+    setMostrarConfirmacion(false)
+    router.replace('/admin/padron/edicion')
+  }
+
   return (
     <div>
+      <AlertDialog
+        isOpen={mostrarConfirmacion}
+        titulo={'Actualización'}
+        texto={`¿Necesitas actualizar tus datos vigentes? Si tu respuesta es afirmativa, entonces se creará un registro temporal para que registres los cambios.`}
+      >
+        <Button variant={'outlined'} onClick={cancelarConfirmacion}>
+          NO
+        </Button>
+        <Button variant={'contained'} onClick={aceptarConfirmacion}>
+          SI
+        </Button>
+      </AlertDialog>
       <CustomDataTable
         titulo={'Registro'}
         error={!!errorModulosData}
@@ -246,18 +327,18 @@ export default function RegistroPage() {
         paginacion={paginacion}
         contenidoTabla={contenidoTabla}
         filtros={
-                  mostrarFiltroApm && (
-                    <FiltroApm
-                      buscarApm={filtroApm}
-                      accionCorrecta={(filtros) => {
-                        setPagina(1)
-                        setLimite(10)
-                        setFiltroApm(filtros.buscar)
-                      }}
-                      accionCerrar={() => {}}
-                    />
-                  )
-                }
+          mostrarFiltroApm && (
+            <FiltroApm
+              buscarApm={filtroApm}
+              accionCorrecta={(filtros) => {
+                setPagina(1)
+                setLimite(10)
+                setFiltroApm(filtros.buscar)
+              }}
+              accionCerrar={() => { }}
+            />
+          )
+        }
       />
     </div>
   );

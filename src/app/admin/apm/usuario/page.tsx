@@ -5,10 +5,6 @@ import { Constantes } from '@/config/Constantes'
 import React, { ReactNode, useEffect, useState } from 'react'
 import { delay, InterpreteMensajes, siteName, titleCase } from '@/utils'
 import { imprimir } from '@/utils/imprimir'
-import {
-  RolType,
-  UsuarioCRUDType,
-} from '@/app/admin/(configuracion)/usuarios/types/usuariosCRUDTypes'
 import { useAlerts, useSession } from '@/hooks'
 import { useAuth } from '@/context/AuthProvider'
 import { CasbinTypes } from '@/types'
@@ -31,16 +27,18 @@ import { AlertDialog } from '@/components/modales/AlertDialog'
 import { CustomDialog } from '@/components/modales/CustomDialog'
 import {
   FiltroUsuarios,
-  VistaModalUsuario,
 } from '@/app/admin/(configuracion)/usuarios/ui'
 import { CustomDataTable } from '@/components/datatable/CustomDataTable'
 import { Paginacion } from '@/components/datatable/Paginacion'
 import { CustomSwitch } from '@/components/botones/CustomSwitch'
 import { CustomToggleButton } from '@/components/botones/CustomToogleButton'
+import { VistaModalUsuario } from './ui/ModalUsuarios'
+import { RolType, UsuarioCRUDType, UsuarioListType } from './types/usuariosCRUDTypes'
+import { UsuarioRolCRUDType } from '../../(configuracion)/usuarios/types/usuariosCRUDTypes'
 
 export default function UsuariosPage() {
   // data de usuarios
-  const [usuariosData, setUsuariosData] = useState<UsuarioCRUDType[]>([])
+  const [usuariosData, setUsuariosData] = useState<UsuarioListType[]>([])
 
   // Flag que indica que hay un proceso cargando visualmente
   const [loading, setLoading] = useState<boolean>(true)
@@ -187,7 +185,11 @@ export default function UsuariosPage() {
             id={`cambiarEstadoUsuario-${usuarioData.id}`}
             titulo={usuarioData.estado == 'ACTIVO' ? 'Inactivar' : 'Activar'}
             accion={() => {
-              editarEstadoUsuarioModal(usuarioData)
+              editarEstadoUsuarioModal({
+                id: usuarioData.id, numeroDocumento: usuarioData.persona.numeroDocumento, primerApellido: usuarioData.persona.primerApellido,
+                segundoApellido: usuarioData.persona.segundoApellido, nombres: usuarioData.persona.nombres, fechaNacimiento: usuarioData.persona.fechaNacimiento,
+                correoElectronico: usuarioData.correoElectronico, usuarioRol: usuarioData.usuarioRol
+              })
             }}
             desactivado={usuarioData.estado == 'PENDIENTE'}
             color={usuarioData.estado == 'ACTIVO' ? 'success' : 'error'}
@@ -201,22 +203,22 @@ export default function UsuariosPage() {
         )}
         {(usuarioData.estado == 'ACTIVO' ||
           usuarioData.estado == 'INACTIVO') && (
-          <IconoTooltip
-            id={`restablecerContrasena-${usuarioData.id}`}
-            titulo={
-              usuarioData.ciudadaniaDigital
-                ? 'No puede restablecer la contraseña'
-                : 'Restablecer contraseña'
-            }
-            color={'info'}
-            accion={async () => {
-              await restablecimientoPassUsuarioModal(usuarioData)
-            }}
-            desactivado={usuarioData.ciudadaniaDigital}
-            icono={'vpn_key'}
-            name={'Restablecer contraseña'}
-          />
-        )}
+            <IconoTooltip
+              id={`restablecerContrasena-${usuarioData.id}`}
+              titulo={
+                usuarioData.ciudadaniaDigital
+                  ? 'No puede restablecer la contraseña'
+                  : 'Restablecer contraseña'
+              }
+              color={'info'}
+              accion={async () => {
+                await restablecimientoPassUsuarioModal(usuarioData)
+              }}
+              desactivado={usuarioData.ciudadaniaDigital}
+              icono={'vpn_key'}
+              name={'Restablecer contraseña'}
+            />
+          )}
         {usuarioData.estado == 'PENDIENTE' && (
           <IconoTooltip
             id={`reenviarCorreoActivacion-${usuarioData.id}`}
@@ -237,7 +239,11 @@ export default function UsuariosPage() {
             color={'primary'}
             accion={() => {
               imprimir(`Editaremos`, usuarioData)
-              editarUsuarioModal(usuarioData)
+              editarUsuarioModal({
+                id: usuarioData.id, numeroDocumento: usuarioData.persona.numeroDocumento, primerApellido: usuarioData.persona.primerApellido,
+                segundoApellido: usuarioData.persona.segundoApellido, nombres: usuarioData.persona.nombres, fechaNacimiento: usuarioData.persona.fechaNacimiento,
+                correoElectronico: usuarioData.correoElectronico, usuarioRol: usuarioData.usuarioRol
+              })
             }}
             icono={'edit'}
             name={'Editar usuario'}
@@ -246,6 +252,7 @@ export default function UsuariosPage() {
       </Stack>,
     ]
   )
+
 
   /// Acciones para data table
   const acciones: Array<ReactNode> = [
@@ -296,7 +303,7 @@ export default function UsuariosPage() {
       setLoading(true)
 
       const respuesta = await sesionPeticion({
-        url: `${Constantes.baseUrl}/usuarios`,
+        url: `${Constantes.baseUrl}/administracion/listarUsuarios`,
         params: {
           pagina: pagina,
           limite: limite,
@@ -305,8 +312,8 @@ export default function UsuariosPage() {
           ...(ordenFiltrado(ordenCriterios).length == 0
             ? {}
             : {
-                orden: ordenFiltrado(ordenCriterios).join(','),
-              }),
+              orden: ordenFiltrado(ordenCriterios).join(','),
+            }),
         },
       })
       setUsuariosData(respuesta.datos?.filas)
@@ -326,7 +333,7 @@ export default function UsuariosPage() {
     try {
       setLoading(true)
       const respuesta = await sesionPeticion({
-        url: `${Constantes.baseUrl}/autorizacion/roles`,
+        url: `${Constantes.baseUrl}/administracion/rolesApm`,
       })
       setRolesData(respuesta.datos)
       setErrorData(null)
@@ -340,29 +347,6 @@ export default function UsuariosPage() {
     }
   }
 
-  /// Petición que cambia el estado de un usuario
-  const cambiarEstadoUsuarioPeticion = async (usuario: UsuarioCRUDType) => {
-    try {
-      //setLoading(true)
-      const respuesta = await sesionPeticion({
-        url: `${Constantes.baseUrl}/usuarios/${usuario.id}/${
-          usuario.estado == 'ACTIVO' ? 'inactivacion' : 'activacion'
-        }`,
-        method: 'patch',
-      })
-      imprimir(`respuesta inactivar usuario: ${respuesta}`)
-      Alerta({
-        mensaje: InterpreteMensajes(respuesta),
-        variant: 'success',
-      })
-      await obtenerUsuariosPeticion()
-    } catch (e) {
-      imprimir(`Error al inactivar usuarios`, e)
-      Alerta({ mensaje: `${InterpreteMensajes(e)}`, variant: 'error' })
-    } finally {
-      setLoading(false)
-    }
-  }
 
   /// Petición que restablecer la contraseña del usuario
   const restablecerPassUsuarioPeticion = async (usuario: UsuarioCRUDType) => {
@@ -456,14 +440,6 @@ export default function UsuariosPage() {
     setUsuarioEdicion(null)
   }
 
-  /// Método que oculta la alerta y procede al cambio
-  const aceptarAlertaEstadoUsuario = async () => {
-    setMostrarAlertaEstadoUsuario(false)
-    if (usuarioEdicion) {
-      await cambiarEstadoUsuarioPeticion(usuarioEdicion)
-    }
-    setUsuarioEdicion(null)
-  }
 
   /// Método que cierra alerta de cambio de estado
 
@@ -514,11 +490,11 @@ export default function UsuariosPage() {
     obtenerRolesPeticion()
       .then(() => {
         obtenerUsuariosPeticion()
-          .catch(() => {})
-          .finally(() => {})
+          .catch(() => { })
+          .finally(() => { })
       })
-      .catch(() => {})
-      .finally(() => {})
+      .catch(() => { })
+      .finally(() => { })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     pagina,
@@ -540,25 +516,12 @@ export default function UsuariosPage() {
   return (
     <>
       <title>{`Usuarios - ${siteName()}`}</title>
-      <AlertDialog
-        isOpen={mostrarAlertaEstadoUsuario}
-        titulo={'Alerta'}
-        texto={`¿Está seguro de ${
-          usuarioEdicion?.estado == 'ACTIVO' ? 'inactivar' : 'activar'
-        } a ${titleCase(usuarioEdicion?.persona.nombres ?? '')} ?`}
-      >
-        <Button variant={'outlined'} onClick={cancelarAlertaEstadoUsuario}>
-          Cancelar
-        </Button>
-        <Button variant={'contained'} onClick={aceptarAlertaEstadoUsuario}>
-          Aceptar
-        </Button>
-      </AlertDialog>
+
       <AlertDialog
         isOpen={mostrarAlertaRestablecerUsuario}
         titulo={'Alerta'}
         texto={`¿Está seguro de restablecer la contraseña de
-         ${titleCase(usuarioEdicion?.persona.nombres ?? '')} ?`}
+         ${titleCase(usuarioEdicion?.nombres ?? '')} ?`}
       >
         <Button variant={'outlined'} onClick={cancelarAlertaRestablecerUsuario}>
           Cancelar
@@ -571,7 +534,7 @@ export default function UsuariosPage() {
         isOpen={mostrarAlertaReenvioCorreo}
         titulo={'Alerta'}
         texto={`¿Está seguro de reenviar el correo de activación de
-         ${titleCase(usuarioEdicion?.persona.nombres ?? '')} ?`}
+         ${titleCase(usuarioEdicion?.nombres ?? '')} ?`}
       >
         <Button onClick={cancelarAlertaReenvioCorreo}>Cancelar</Button>
         <Button onClick={aceptarAlertaReenvioCorreo}>Aceptar</Button>
@@ -593,7 +556,7 @@ export default function UsuariosPage() {
         />
       </CustomDialog>
       <CustomDataTable
-        titulo={'Usuarios'}
+        titulo={'Usuarios APM'}
         error={!!errorData}
         cargando={loading}
         acciones={acciones}
@@ -612,7 +575,7 @@ export default function UsuariosPage() {
                 setFiltroRoles(filtros.roles)
                 setFiltroUsuario(filtros.usuario)
               }}
-              accionCerrar={() => {}}
+              accionCerrar={() => { }}
             />
           )
         }

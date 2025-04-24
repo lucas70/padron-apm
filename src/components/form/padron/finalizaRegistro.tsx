@@ -1,6 +1,6 @@
 import React, { ChangeEvent, useState } from 'react'
 import FormDisplayText from '../FormDisplayText'
-import { Grid, Switch, Alert, Button } from '@mui/material'
+import { Grid, Switch, Alert, Button, Typography, Box, Stack } from '@mui/material'
 import { AlertDialog } from '@/components/modales/AlertDialog';
 import { InterpreteMensajes, titleCase } from '@/utils';
 import { useAlerts, useSession } from '@/hooks';
@@ -61,7 +61,7 @@ const FinalizaRegistroPage = () => {
         method: 'patch',
       })
 
-      updateDatoGral({...datoGral, etapaActorMinero: respuesta.datos.etapaActorMinero})
+      updateDatoGral({ ...datoGral, etapaActorMinero: respuesta.datos.etapaActorMinero })
 
       Alerta({
         mensaje: InterpreteMensajes(respuesta),
@@ -102,8 +102,11 @@ const FinalizaRegistroPage = () => {
             Usted ha registrado toda la información solicitada en el formulario de pre-registro?
           </Alert>
         </Grid>
-        <Grid item xs={4}>
-          <Switch size='small' onChange={onChangePrimer} checked={primer} />
+        <Grid item xs={2}>
+          <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
+            <Switch size='small' onChange={onChangePrimer} checked={primer} />
+            <Typography fontSize={'small'} sx={{ fontWeight: '700' }}>{primer ? 'SI' : 'NO'}</Typography>
+          </Stack>
         </Grid>
         <Grid item xs={8}>
           <Alert severity="success">
@@ -111,7 +114,10 @@ const FinalizaRegistroPage = () => {
           </Alert>
         </Grid>
         <Grid item xs={4}>
-          <Switch size='small' disabled={!primer} onChange={onChangeSegundo} checked={segundo} />
+          <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
+            <Switch size='small' disabled={!primer} onChange={onChangeSegundo} checked={segundo} />
+            <Typography fontSize={'small'} sx={{ fontWeight: '700' }}>{segundo ? 'SI' : 'NO'}</Typography>
+          </Stack>
         </Grid>
         <Grid item xs={8}>
           <Alert severity="success">
@@ -120,7 +126,10 @@ const FinalizaRegistroPage = () => {
 
         </Grid>
         <Grid item xs={4}>
-          <Switch size='small' disabled={!segundo} onChange={onChangeTercer} checked={tercer} />
+          <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
+            <Switch size='small' disabled={!segundo} onChange={onChangeTercer} checked={tercer} />
+            <Typography fontSize={'small'} sx={{ fontWeight: '700' }}>{tercer ? 'SI' : 'NO'}</Typography>
+          </Stack>
         </Grid>
       </Grid>
     </div>

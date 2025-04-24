@@ -20,6 +20,9 @@ export default function HomePage() {
 
     const temporal = await usuario?.roles.find((rol) => rol.rol === 'TEMPORAL')
     console.log('temporal:-->', temporal)
+    updateTemporal(false);
+    updateTecnico(false);
+    
     if (temporal !== undefined)
       updateTemporal(true)
 

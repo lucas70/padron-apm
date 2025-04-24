@@ -1,11 +1,6 @@
 /// Vista modal de usuario
 import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import {
-  CrearEditarUsuarioType,
-  RolType,
-  UsuarioCRUDType,
-} from '../types/usuariosCRUDTypes'
 
 import {
   Box,
@@ -27,6 +22,7 @@ import {
 } from 'src/components/form'
 import { isValidEmail } from '@/utils/validations'
 import ProgresoLineal from '@/components/progreso/ProgresoLineal'
+import { CrearEditarUsuarioType, RolType, UsuarioCRUDType } from '../types/usuariosCRUDTypes'
 
 export interface ModalUsuarioType {
   usuario?: UsuarioCRUDType | undefined | null
@@ -53,18 +49,13 @@ export const VistaModalUsuario = ({
   const { handleSubmit, control } = useForm<CrearEditarUsuarioType>({
     defaultValues: {
       id: usuario?.id,
-      usuario: usuario?.usuario,
-      roles: usuario?.usuarioRol.map((rol) => rol.rol.id),
-      estado: usuario?.estado,
+      roles: usuario?.usuarioRol.map((rol) => rol.id),
       correoElectronico: usuario?.correoElectronico,
-      persona: {
-        nroDocumento: usuario?.persona.numeroDocumento,
-        nombres: usuario?.persona.nombres,
-        primerApellido: usuario?.persona.primerApellido,
-        segundoApellido: usuario?.persona.segundoApellido,
-        fechaNacimiento: usuario?.persona.fechaNacimiento,
-      },
-      ciudadaniaDigital: usuario?.ciudadaniaDigital,
+      numeroDocumento: usuario?.numeroDocumento,
+      nombres: usuario?.nombres,
+      primerApellido: usuario?.primerApellido,
+      segundoApellido: usuario?.segundoApellido,
+      fechaNacimiento: usuario?.fechaNacimiento,
     },
   })
 
@@ -75,27 +66,20 @@ export const VistaModalUsuario = ({
   const guardarActualizarUsuariosPeticion = async (
     usuario: CrearEditarUsuarioType
   ) => {
+    console.log('usuario a guardar: -->', usuario)
     try {
       setLoadingModal(true)
       await delay(1000)
       const respuesta = await sesionPeticion({
-        url: `${Constantes.baseUrl}/usuarios${
-          usuario.id ? `/${usuario.id}` : ''
-        }`,
+        url: `${Constantes.baseUrl}/administracion/usuario${usuario.id ? `/${usuario.id}` : ''
+          }`,
         method: !!usuario.id ? 'patch' : 'post',
         body: {
           ...usuario,
-          ...{
-            persona: {
-              ...usuario.persona,
-              ...{
-                fechaNacimiento: formatoFecha(
-                  usuario.persona.fechaNacimiento,
-                  'YYYY-MM-DD'
-                ),
-              },
-            },
-          },
+          fechaNacimiento: formatoFecha(
+            usuario.fechaNacimiento,
+            'YYYY-MM-DD'
+          )
         },
       })
       Alerta({
@@ -125,7 +109,7 @@ export const VistaModalUsuario = ({
               <FormInputText
                 id={'nroDocumento'}
                 control={control}
-                name="persona.nroDocumento"
+                name="numeroDocumento"
                 label="Nro. Documento"
                 disabled={loadingModal}
                 rules={{ required: 'Este campo es requerido' }}
@@ -135,7 +119,7 @@ export const VistaModalUsuario = ({
               <FormInputText
                 id={'nombre'}
                 control={control}
-                name="persona.nombres"
+                name="nombres"
                 label="Nombre"
                 disabled={loadingModal}
                 rules={{ required: 'Este campo es requerido' }}
@@ -145,7 +129,7 @@ export const VistaModalUsuario = ({
               <FormInputText
                 id={'primerApellido'}
                 control={control}
-                name="persona.primerApellido"
+                name="primerApellido"
                 label="Primer Apellido"
                 disabled={loadingModal}
               />
@@ -154,7 +138,7 @@ export const VistaModalUsuario = ({
               <FormInputText
                 id={'segundoApellido'}
                 control={control}
-                name="persona.segundoApellido"
+                name="segundoApellido"
                 label="Segundo apellido"
                 disabled={loadingModal}
               />
@@ -163,7 +147,7 @@ export const VistaModalUsuario = ({
               <FormInputDate
                 id={'fechaNacimiento'}
                 control={control}
-                name="persona.fechaNacimiento"
+                name="fechaNacimiento"
                 label="Fecha de nacimiento"
                 disabled={loadingModal}
                 rules={{ required: 'Este campo es requerido' }}

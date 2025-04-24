@@ -10,7 +10,7 @@ import { Servicios } from '@/services'
 import { Constantes } from '@/config/Constantes'
 import { imprimir } from '@/utils/imprimir'
 import { Icono } from '@/components/Icono'
-import { FormInputText } from 'src/components/form'
+import { FormInputDate, FormInputText } from 'src/components/form'
 import { isValidEmail } from '@/utils/validations'
 import ProgresoLineal from '@/components/progreso/ProgresoLineal'
 import { useRouter } from 'next/navigation'
@@ -191,11 +191,11 @@ const RegistroSolicitud = () => {
                         <Box height={'10px'} />
                         <Grid container direction="row" spacing={{ xs: 2, sm: 1, md: 2 }}>
                             <Grid item xs={12} sm={12} md={12}>
-                                <FormInputText
+                                <FormInputDate
                                     id={'fechaNacimiento'}
                                     control={control}
                                     name="fechaNacimiento"
-                                    label="Fecha Nacimiento"
+                                    label="Fecha de nacimiento"
                                     disabled={indicadorCarga}
                                     rules={{ required: 'Este campo es requerido' }}
                                 />

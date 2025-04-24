@@ -161,7 +161,7 @@ const ImpresionFormularios = () => {
           <Grid container spacing={2}>
             <Grid item xs={8}>
               <Alert severity="success">
-                Usted debe imprimir 2 ejemplares del formulario de registro y luego apersonarse a la plataforma de atenciòn de la AJAM, con la documentaciòn de respaldo correspondiente.  Una vez finalizada la revisiòn por parte del personal técnico de plataforma  y si no existira observaciòn alguna se le entregará su certificado de inscripción.
+                Usted debe imprimir 2 ejemplares del formulario de registro y luego apersonarse a la plataforma de atenciòn de la AJAM, con la documentaciòn de respaldo correspondiente.  Una vez finalizada la revisiòn por parte del personal técnico de plataforma  se le entregará su certificado de inscripción.
               </Alert>
 
             </Grid>

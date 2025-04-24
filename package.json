@@ -1,7 +1,7 @@
 {
   "name": "nextjs-base-frontend",
   "version": "2.0.0",
-  "description": "Frontend base con Next.js, MUI v5 y TypeScript",
+  "description": "SI-APM con Next.js, MUI v5 y TypeScript",
   "author": "agetic@agetic.gob.bo",
   "private": true,
   "scripts": {

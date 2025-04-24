@@ -24,7 +24,7 @@ export interface PersonaCRUDType {
   fechaNacimiento: string
 }
 
-export interface UsuarioCRUDType {
+export interface UsuarioListType {
   id: string
   usuario: string
   ciudadaniaDigital: boolean
@@ -34,24 +34,36 @@ export interface UsuarioCRUDType {
   persona: PersonaCRUDType
 }
 
+export interface UsuarioCRUDType {
+  id: string
+  numeroDocumento: string
+  primerApellido: string
+  segundoApellido: string
+  nombres: string
+  fechaNacimiento: string
+  correoElectronico: string
+  usuarioRol: UsuarioRolCRUDType[]
+}
+
 // Crear usuario
 
 export interface CrearPersonaType {
   nombres: string
   primerApellido: string
   segundoApellido: string
-  nroDocumento: string
+  numeroDocumento: string
   fechaNacimiento: string
 }
 
 export interface CrearEditarUsuarioType {
-  id?: string
-  usuario?: string
-  persona: CrearPersonaType
-  ciudadaniaDigital: boolean
-  roles: string[]
-  estado: string
+  id: string
+  numeroDocumento: string
+  primerApellido: string
+  segundoApellido: string
+  nombres: string
+  fechaNacimiento: string
   correoElectronico: string
+  roles: string[]
 }
 
 /// Tipo rol transversal

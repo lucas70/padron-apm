@@ -152,7 +152,7 @@ export const NavbarUser = () => {
       >
         <DialogContent>
           <Typography variant={'body2'} sx={{ pt: 2, pb: 2 }}>
-            Propuesta de Frontend Base Administrador creado con NextJS y
+            Administrador creado con NextJS y
             Typescript
           </Typography>
         </DialogContent>
